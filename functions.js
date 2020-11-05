@@ -26,6 +26,28 @@ function definePlanet(orbitRate, rotationRate, distanceFromOrbitCenter, size, co
 
 
 /**
+ * Idem que la fonction definePlanet, avec une texture à la place d'une couleur
+ * Same as the definePlanet function, with texture instead of color
+ * @param {type} orbitRate Vitesse orbitale
+ * @param {type} rotationRate Vitesse de rotation
+ * @param {type} distanceFromOrbitCenter Distance du centre de l'objet autour duquel orbite l'astre (Soleil ou autre planète s'il s'agit d'une lune)
+ * @param {type} size Taille de la planète (Rayon)
+ * @param {type} texture Texture de la planète / Planet texture
+ * @returns {THREE.Mesh}
+ */
+function defineTexturedPlanet(orbitRate, rotationRate, distanceFromOrbitCenter, size, texture) {
+    return {
+        orbitRate: orbitRate,
+        rotationRate: rotationRate,
+        distanceFromOrbitCenter: distanceFromOrbitCenter,
+        size: size,
+        texture: texture
+    };
+}
+
+
+
+/**
  * Stocke les caractéristiques propres à un anneau dans un objet, pour éviter les nombres magiques dans le code des fonctions
  * Stores the ring properties in an object, to avoid magic numbers in the function code
  * @param {type} size Taille de la couronne extérieure
@@ -65,6 +87,28 @@ function createPlanet(planetData){
 
 
 /**
+ * Idem que la fonction createPlanet, avec une texture à la place d'une couleur
+ * Same as the createPlanet function, with texture instead of color 
+ * @param {type} planetData Données de la planète
+ * @returns {THREE.Mesh}
+ */
+function createTexturedPlanet(planetData){
+    const texture = new THREE.TextureLoader().load( planetData.texture );
+    var planetMaterial = new THREE.MeshStandardMaterial({ map: texture });
+    planetMaterial.receiveShadow = true;
+    planetMaterial.castShadow = true;
+    var planetGeometry = new THREE.SphereGeometry(planetData.size);
+    planet = new THREE.Mesh(planetGeometry, planetMaterial);
+    planet.receiveShadow = true;
+    planet.position.set(planetData.distanceFromOrbitCenter, 0, 0);
+    scene.add(planet);
+    return planet;
+}
+
+
+
+
+/**
  * Initialise l'anneau et l'ajoute à la scène / Initialize the ring et add it to the scene.
  * @param {type} ringData Données de l'anneau
  * @returns {THREE.Mesh}
@@ -92,7 +136,7 @@ function createRing(ringData) {
  *  Third parameter is always set to zero in order to set the center of the ring at the center of the sun
  *  @returns {undefined}
  */
-function createVisibleOrbits() {
+function traceOrbits() {
     var orbitWidth = 0.08;
     mercuryOrbit = createRing(defineRing(mercuryData.distanceFromOrbitCenter + orbitWidth, mercuryData.distanceFromOrbitCenter - orbitWidth, 0, 0xffffff));
     venusOrbit = createRing(defineRing(venusData.distanceFromOrbitCenter + orbitWidth, venusData.distanceFromOrbitCenter - orbitWidth, 0, 0xffffff));
@@ -103,6 +147,7 @@ function createVisibleOrbits() {
     uranusOrbit = createRing(defineRing(uranusData.distanceFromOrbitCenter + orbitWidth, uranusData.distanceFromOrbitCenter - orbitWidth, 0, 0xffffff));
     neptuneOrbit = createRing(defineRing(neptuneData.distanceFromOrbitCenter + orbitWidth, neptuneData.distanceFromOrbitCenter - orbitWidth, 0, 0xffffff));
 }
+
 
 
 /**
@@ -143,6 +188,8 @@ function movePlanet(planet, planetData, time, isRing) {
             * planetData.distanceFromOrbitCenter;
     }
 }
+
+
 
 /**
  * Déplace une planète autour de son orbite et la fait touner sur elle-même ou un anneau autour de sa planète

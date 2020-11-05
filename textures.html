@@ -1,5 +1,5 @@
 <!-- 
-    SolarSystemThreeJS/index.html
+    SolarSystemThreeJS/textures.html
     Auteur/Author : Frédéric CANAUD
 -->
 
@@ -25,15 +25,15 @@
         var controls, scene, camera, renderer, scene;
 
         // Déclaration des planètes et des anneaux
-        var mercuryData = definePlanet(87.97, 0.015, 10, 0.38, 0xd7711c);
-        var venusData = definePlanet(224.70, 0.015, 19, 0.95, 0xd7711c);
-        var earthData = definePlanet(365.2564, 0.015, 25, 1, 0x0000ff);
-        var moonData = definePlanet(29.5, 0.01, 2.8, 0.5, 0xffffff);
-        var marsData = definePlanet(686.98, 0.015, 38, 0.53, 0xff4800);
-        var jupiterData = definePlanet(825.59, 0.007, 53, 11, 0xbfad99);
-        var saturnData = definePlanet(1075.23, 0.004, 78, 8, 0xd1a575);
-        var uranusData = definePlanet(1485.40, 0.002, 100, 2, 0x45dfed);
-        var neptuneData = definePlanet(1866.00, 0.0005, 120, 2, 0x146cc4);
+        var mercuryData = defineTexturedPlanet(87.97, 0.015, 10, 0.38, "img/mercury.jpg");
+        var venusData = defineTexturedPlanet(224.70, 0.015, 19, 0.95, "img/venus.jpg");
+        var earthData = defineTexturedPlanet(365.2564, 0.015, 25, 1, "img/earth.jpg");
+        var moonData = defineTexturedPlanet(29.5, 0.01, 2.8, 0.5, "img/moon.jpg");
+        var marsData = defineTexturedPlanet(686.98, 0.015, 38, 0.53, "img/mars.jpg");
+        var jupiterData = defineTexturedPlanet(825.59, 0.007, 53, 11, "img/jupiter.jpg");
+        var saturnData = defineTexturedPlanet(1075.23, 0.004, 78, 8, "img/saturn.jpg");
+        var uranusData = defineTexturedPlanet(1485.40, 0.002, 100, 2, "img/uranus.jpg");
+        var neptuneData = defineTexturedPlanet(1866.00, 0.0005, 120, 2, "img/neptune.jpg");
 
         var saturnRingData = defineRing(9.3, 8.3, 0x757064, saturnData.distanceFromOrbitCenter);
         var saturnRing2Data = defineRing(10.3, 9.6, 0x757064, saturnData.distanceFromOrbitCenter);
@@ -71,31 +71,46 @@
             scene.add(ambientLight);
 
             //////////////////////////////////////// PLAN //////////////////////////////////////
-
-            var planGeometry = new THREE.PlaneGeometry(125, 125, 0);
-            var whiteMaterial = new THREE.MeshBasicMaterial({ color: 0x615e5e, side: THREE.DoubleSide });
+            
+            var planGeometry = new THREE.PlaneGeometry(75, 75, 0);
+            var whiteMaterial = new THREE.MeshBasicMaterial({ color: 0x615e5e, side: THREE.DoubleSide, transparent: true,  opacity: 0.35 });
             plan = new THREE.Mesh(planGeometry, whiteMaterial);
             plan.rotation.x = Math.PI / 2;
             plan.position.y -= 25;
             scene.add(plan);
-
+            
             /////////////// SOLEIL, PLANETES ET ANNEAUX - SUN, PLANETS AND RING /////////////////
 
-            var sunMaterial = new THREE.MeshStandardMaterial({ emissive: 0xfff266, emissiveIntensity: 1 });
+            const sunTexture = new THREE.TextureLoader().load('img/sun.jpg');
+            var sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
             var sunGeometry = new THREE.SphereGeometry(8, 24, 24);
             sun = new THREE.Mesh(sunGeometry, sunMaterial);
+
+            // Ajout d'un "glow effect" sur le soleil à l'aide d'un Sprite
+            var spriteMaterial = new THREE.SpriteMaterial({map: new THREE.TextureLoader().load("img/glow.png"), color: 0xffff88, transparent: false, blending: THREE.AdditiveBlending});
+            var sprite = new THREE.Sprite(spriteMaterial);
+            sprite.scale.set(30, 30, 1.0); // Permet d'agrandir la taille du glow effect
+            sun.add(sprite); 
             scene.add(sun);
+
+            // Ajout d'un background
+            const etoileTexture = new THREE.TextureLoader().load('img/star.jpg');
+            var etoileMaterial = new THREE.MeshBasicMaterial({ map: etoileTexture, side: THREE.DoubleSide });
+            var etoileGeometry = new THREE.SphereGeometry(320, 160);
+            etoile = new THREE.Mesh(etoileGeometry, etoileMaterial);
+            scene.add(etoile);
+
             camera.lookAt(new THREE.Vector3(sun.position.x, sun.position.y, sun.position.z));
 
-            mercury = createPlanet(mercuryData);
-            venus = createPlanet(venusData);
-            earth = createPlanet(earthData);
-            moon = createPlanet(moonData);
-            mars = createPlanet(marsData);
-            jupiter = createPlanet(jupiterData);
-            saturn = createPlanet(saturnData);
-            uranus = createPlanet(uranusData);
-            neptune = createPlanet(neptuneData);
+            mercury = createTexturedPlanet(mercuryData);
+            venus = createTexturedPlanet(venusData);
+            earth = createTexturedPlanet(earthData);
+            moon = createTexturedPlanet(moonData);
+            mars = createTexturedPlanet(marsData);
+            jupiter = createTexturedPlanet(jupiterData);
+            saturn = createTexturedPlanet(saturnData);
+            uranus = createTexturedPlanet(uranusData);
+            neptune = createTexturedPlanet(neptuneData);
 
             saturnRing = createRing(saturnRingData);
             saturnRing2 = createRing(saturnRing2Data);
@@ -118,7 +133,8 @@
             var time = Date.now();
 
             // Mouvement du soleil, des planètes/lunes et des anneaux
-            sun.rotation.y += orbitData.value * 5;
+            // Moving sun, planets/moons and rings
+            sun.rotation.y += orbitData.value * 10;
             movePlanet(earth, earthData, time);
             movePlanet(mercury, mercuryData, time);
             movePlanet(venus, venusData, time);
